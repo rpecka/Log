@@ -67,6 +67,14 @@ open class Logger {
         return theme?.description ?? ""
     }
     
+    /// Path for app logs
+    private var _logPath: URL?
+    private var logPath: URL {
+        let path = _logPath ?? URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("log-\(String(Date().timeIntervalSince1970)).log")
+        _logPath = path
+        return path
+    }
+
     /// The queue used for logging.
     private let queue = DispatchQueue(label: "delba.log")
     
@@ -193,6 +201,7 @@ open class Logger {
         
         queue.async {
             Swift.print(result, separator: "", terminator: "")
+            self.appedStringToLog(result)
         }
     }
     
@@ -227,6 +236,43 @@ open class Logger {
         
         queue.async {
             Swift.print(result)
+        }
+    }
+    
+    public func sessionLog() -> String {
+        var log = ""
+        do {
+         log = try String(contentsOf: logPath, encoding: .utf8)
+        } catch {
+           self.error("Can't fetch session log")
+        }
+        return log
+    }
+    // MARK: Private Methods
+    private func appedStringToLog(_ string: String) {
+        let textToAppend = string.data(using: .utf8, allowLossyConversion: false)!
+        if FileManager.default.fileExists(atPath: self.logPath.path) {
+            do {
+                let fileHandle = try FileHandle(forWritingTo: self.logPath)
+                fileHandle.seekToEndOfFile()
+                fileHandle.write(textToAppend)
+                fileHandle.closeFile()
+            } catch {
+                print("LOG: Can't open fileHandle \(error)")
+            }
+        } else {
+            do {
+                try textToAppend.write(to: self.logPath, options: .atomicWrite)
+            } catch {
+                print("LOG: Can't write to file \"\(self.logPath)\": \(error)")
+            }
+        }
+    }
+    private func cleanLogFile() {
+        do {
+            try FileManager.default.removeItem(at: logPath)
+        } catch {
+            self.error("Can't delete log file at path \(logPath)")
         }
     }
 }
