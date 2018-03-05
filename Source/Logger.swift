@@ -253,7 +253,7 @@ open class Logger {
     // MARK: Private Methods
     private func appedStringToLog(_ string: String) {
         let textToAppend = string.data(using: .utf8, allowLossyConversion: false)!
-        didAddLogString?(textToAppend)
+        didAddLogString?(string)
         if FileManager.default.fileExists(atPath: self.logPath.path) {
             do {
                 let fileHandle = try FileHandle(forWritingTo: self.logPath)
