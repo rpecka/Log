@@ -78,6 +78,8 @@ open class Logger {
     /// The queue used for logging.
     private let queue = DispatchQueue(label: "delba.log")
     
+    var didAddLogString : ((_ text: String) -> Void)?
+    
     /**
      Creates and returns a new logger.
      
@@ -251,6 +253,7 @@ open class Logger {
     // MARK: Private Methods
     private func appedStringToLog(_ string: String) {
         let textToAppend = string.data(using: .utf8, allowLossyConversion: false)!
+        didAddLogString?(textToAppend)
         if FileManager.default.fileExists(atPath: self.logPath.path) {
             do {
                 let fileHandle = try FileHandle(forWritingTo: self.logPath)
