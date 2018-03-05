@@ -78,7 +78,7 @@ open class Logger {
     /// The queue used for logging.
     private let queue = DispatchQueue(label: "delba.log")
     
-    var didAddLogString : ((_ text: String) -> Void)?
+    public var didAddLogString : ((_ text: String) -> Void)?
     
     /**
      Creates and returns a new logger.
