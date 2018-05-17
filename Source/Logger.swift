@@ -200,11 +200,11 @@ open class Logger {
             function: function,
             date: date
         )
-        assert(level != .error, result)
 
         queue.async {
             Swift.print(result, separator: "", terminator: "")
             self.appedStringToLog(result)
+            assert(level != .error, result)
         }
     }
     
