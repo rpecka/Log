@@ -200,19 +200,18 @@ open class Logger {
             function: function,
             date: date
         )
-
-        let logGroup = DispatchGroup()
-        logGroup.enter()
-        queue.async { // Go to the logging thread so that execution can continue smoothly
-            Swift.print(result, separator: "", terminator: "")
-            self.appedStringToLog(result)
-            logGroup.leave()
-        }
         
-        if level == .error { // If we are logging an error, block the current thread and wait until logging is complete so that we can maintian the stacktrace
-            logGroup.wait()
-            assert(false, result)
-        }
+        #if DEBUG
+        log(result: result)
+        assert(level != .error, result)
+        #else
+        queue.async { self.log(result: result) }
+        #endif
+    }
+    
+    private func log(result: String) {
+        Swift.print(result, separator: "", terminator: "")
+        appedStringToLog(result)
     }
     
     /**
